@@ -2,31 +2,43 @@ org 0x7c00
 
 jmp _start
 
-message: db "Hel\lo...", 0x00
+message: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
+
+; message: db "Hel\lo.", 0x00
+
+_modulus:
+	mov cx, di
+	_loop:
+		sub cx, 160
+
+		cmp cx, 160
+		ja _loop
+
+	sub di, cx
+	jmp _after_modulus
+
+_reset_di:
+	mov di, 0
+
+	jmp _after_modulus
 
 _newline:
-	mov bx, ' '
-	mov [es:di], bx
-
-	inc di
-	; Adds colour
-	mov [es:di], 0x07	
-	inc di
-
-	dec cx	
-
-	cmp cx, 0
-	ja _newline
-
-	mov cx, 80
 	inc si
+
+	cmp di, 160
+	ja _modulus
+
+	jmp _reset_di
+
+	_after_modulus:
+
+	add di, 160
+
 	jmp _print
 
 ; Use si and di registers to hold message
 ; The message must be put into si first.
 _print:
-	; There are 80 columns in the vga text buffer, so this gets to the new line.
-	mov cx, 80
 	cmp [si], '\'
 	je _newline
 
@@ -39,7 +51,7 @@ _print:
 	inc di
 	inc si
 
-	cmp [si], 0
+	cmp [si], 0x00
 	jne _print
 
 	; Returns, just like a normal return from a function
