@@ -2,10 +2,48 @@ org 0x7c00
 
 jmp _start
 
-message: db "Hello...", 0x00
+message: db "Hel\lo...", 0x00
 
-; use si and di registers to hold message
+_newline:
+	mov bx, ' '
+	mov [es:di], bx
 
+	inc di
+	; Adds colour
+	mov [es:di], 0x07	
+	inc di
+
+	dec cx	
+
+	cmp cx, 0
+	ja _newline
+
+	mov cx, 80
+	inc si
+	jmp _print
+
+; Use si and di registers to hold message
+; The message must be put into si first.
+_print:
+	; There are 80 columns in the vga text buffer, so this gets to the new line.
+	mov cx, 80
+	cmp [si], '\'
+	je _newline
+
+	mov bx, [si]
+	mov [es:di], bx
+
+	inc di
+	; Adds colour
+	mov [es:di], 0x07	
+	inc di
+	inc si
+
+	cmp [si], 0
+	jne _print
+
+	; Returns, just like a normal return from a function
+	ret
 
 _start:
 	cli
@@ -27,29 +65,7 @@ _start:
 	; Which character we're up to.
 	mov di, 0
 
-	_loop:
-		mov bx, [si]
-		mov [es:di], bx
-	
-		inc di
-		mov [es:di], 0x07	
-		inc di
-		inc si
-
-		cmp [si], 0
-		jne _loop
-	hlt
-
-	; Says to draw the character in the al register.
-	mov ah, 0x0E
-	mov al, 'H'
-	mov bx, 0
-	int 0x10
-
-	mov ah, 0x0E
-	mov al, 'I'
-	mov bx, 0
-	int 0x10
+	call _print
 
 	; Marks the program as bootable.
 	times 510 - ($ - $$) db 0
