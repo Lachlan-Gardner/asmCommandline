@@ -2,8 +2,9 @@ org 0x7c00
 
 jmp _start
 
-tophat: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
-tophat_prompt: db "Do you want to see a smiley face with a tophat? (y/n): ", 0x00
+tophat: db "No.", 0x00
+; tophat: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
+tophat_prompt: db "Do you want to see a smiley face with a tophat? (y for yes, anything else for no): ", 0x00
 ; message: db "Hel\lo.", 0x00
 
 _modulus:
@@ -44,25 +45,42 @@ _print:
 	mov ax, 0xB800
 	mov es, ax
 	; Which character we're up to.
-	mov di, 0
-	
+
 	_next_char:
 		cmp [si], '\'
 		je _newline
-	
+
 		mov bx, [si]
 		mov [es:di], bx
-	
+
 		inc di
 		; Adds colour
-		mov [es:di], 0x07	
+		mov [es:di], 0x07
 		inc di
 		inc si
-	
+
 		cmp [si], 0x00
 		jne _next_char
 
 	; Returns, just like a normal return from a function
+	jmp _after_print
+
+_get_input:
+	message: db "starting input", 0x00
+	mov si, message
+	call _print
+
+	mov ah, 2
+	mov dx, 0
+	int 0x14
+
+	mov ah, 1
+	mov dx, 0
+	int 0x14
+
+	cmp al, 'y'
+	je _tophat
+
 	ret
 
 _start:
@@ -75,14 +93,28 @@ _start:
 	; Calls the interrupt for VGA.
 	int 0x10
 
-	; Move the message into the source register.
-	mov si, tophat
+	mov di, 0
 
+	mov si, tophat_prompt
 	call _print
+
+	_after_print:
+
+	call _get_input
+
+	jmp _exit
+
+	_tophat:
+		; Move the message into the source register.
+		mov si, tophat
+
+		call _print
+
+	_exit:
 
 	; Marks the program as bootable.
 	times 510 - ($ - $$) db 0
-	; The magic numbers that say this, below, have to be in the last 512 bytes.
+	; The magic numbers that say this (below) have to be in the last 512 bytes.
 	; Are there two numbers, or are we just doing a 16 bit number in two parts?
 	db 0x55
 	db 0xAA
