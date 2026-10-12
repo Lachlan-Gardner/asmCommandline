@@ -2,8 +2,8 @@ org 0x7c00
 
 jmp _start
 
-message: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
-
+tophat: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
+tophat_prompt: db "Do you want to see a smiley face with a tophat? (y/n): ", 0x00
 ; message: db "Hel\lo.", 0x00
 
 _modulus:
@@ -34,25 +34,33 @@ _newline:
 
 	add di, 160
 
-	jmp _print
+	jmp _next_char
 
 ; Use si and di registers to hold message
 ; The message must be put into si first.
 _print:
-	cmp [si], '\'
-	je _newline
-
-	mov bx, [si]
-	mov [es:di], bx
-
-	inc di
-	; Adds colour
-	mov [es:di], 0x07	
-	inc di
-	inc si
-
-	cmp [si], 0x00
-	jne _print
+	; Moves the destination into es.
+	; Can't be written into directly.
+	mov ax, 0xB800
+	mov es, ax
+	; Which character we're up to.
+	mov di, 0
+	
+	_next_char:
+		cmp [si], '\'
+		je _newline
+	
+		mov bx, [si]
+		mov [es:di], bx
+	
+		inc di
+		; Adds colour
+		mov [es:di], 0x07	
+		inc di
+		inc si
+	
+		cmp [si], 0x00
+		jne _next_char
 
 	; Returns, just like a normal return from a function
 	ret
@@ -68,14 +76,7 @@ _start:
 	int 0x10
 
 	; Move the message into the source register.
-	mov si, message
-
-	; Moves the destination into es.
-	; Can't be written into directly.
-	mov ax, 0xB800
-	mov es, ax
-	; Which character we're up to.
-	mov di, 0
+	mov si, tophat
 
 	call _print
 
