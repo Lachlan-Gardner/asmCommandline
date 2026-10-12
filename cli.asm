@@ -2,9 +2,8 @@ org 0x7c00
 
 jmp _start
 
-tophat: db "No.", 0x00
-; tophat: db "        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
-tophat_prompt: db "Do you want to see a smiley face with a tophat? (y for yes, anything else for no): ", 0x00
+tophat: db "\        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
+tophat_prompt: db "Smiley face (y/anything else): ", 0x00
 ; message: db "Hel\lo.", 0x00
 
 _modulus:
@@ -59,15 +58,30 @@ _print:
 		inc di
 		inc si
 
-		cmp [si], 0x00
+		cmp [si], 0x0
 		jne _next_char
 
 	; Returns, just like a normal return from a function
-	jmp _after_print
+	ret
 
 _get_input:
-	mov ah, 0
+	inc di
+	inc di
+
+	mov ax, 0xB800
+	mov es, ax
+
+	mov ax, 0
+
 	int 0x16
+
+	movzx bx, al
+	mov [es:di], bx
+
+	inc di
+	; Adds colour
+	mov [es:di], 0x07
+	inc di
 
 	cmp al, 'y'
 	je _tophat
@@ -87,8 +101,6 @@ _start:
 
 	mov si, tophat_prompt
 	call _print
-
-	_after_print:
 
 	call _get_input
 
