@@ -3,7 +3,8 @@ org 0x7c00
 jmp _start
 
 tophat: db "\        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
-tophat_prompt: db "Smiley face (y/anything else): ", 0x00
+tophat_prompt: db "Tophat (y/anything else): ", 0x00
+denial: db "\No", 0x00
 ; message: db "Hel\lo.", 0x00
 
 _modulus:
@@ -65,14 +66,10 @@ _print:
 	ret
 
 _get_input:
-	inc di
-	inc di
-
 	mov ax, 0xB800
 	mov es, ax
 
 	mov ax, 0
-
 	int 0x16
 
 	movzx bx, al
@@ -86,7 +83,10 @@ _get_input:
 	cmp al, 'y'
 	je _tophat
 
-	ret
+	mov si, denial
+	call _print
+
+	jmp _exit
 
 _start:
 	; Initialises VGA
