@@ -66,17 +66,8 @@ _print:
 	jmp _after_print
 
 _get_input:
-	message: db "starting input", 0x00
-	mov si, message
-	call _print
-
-	mov ah, 2
-	mov dx, 0
-	int 0x14
-
-	mov ah, 1
-	mov dx, 0
-	int 0x14
+	mov ah, 0
+	int 0x16
 
 	cmp al, 'y'
 	je _tophat
@@ -84,7 +75,6 @@ _get_input:
 	ret
 
 _start:
-	cli
 	; Initialises VGA
 	; ah is left unconfigured since the default is fine.
 	mov ah, 0
