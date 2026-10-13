@@ -119,4 +119,4 @@ _start:
 	; The magic numbers that say this (below) have to be in the last 512 bytes.
 	; Are there two numbers, or are we just doing a 16 bit number in two parts?
 	db 0x55
-	db 0xAAjj
+	db 0xAA
