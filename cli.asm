@@ -2,8 +2,8 @@ org 0x7c00
 
 jmp _start
 
-tophat: db "\        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
-tophat_prompt: db "Tophat (y/anything else): ", 0x00
+tophat: db "\ \        #################\        #################\        #################\        #################\        #################\        #################\     ########################\ \          ###       ###\          ###       ###\ \ \     ###                 ###\      ###               ###\       ###             ###\        #################", 0x00
+tophat_prompt: db "Tophat(y/anything else): ", 0x00
 denial: db "\No", 0x00
 ; message: db "Hel\lo.", 0x00
 
@@ -119,4 +119,4 @@ _start:
 	; The magic numbers that say this (below) have to be in the last 512 bytes.
 	; Are there two numbers, or are we just doing a 16 bit number in two parts?
 	db 0x55
-	db 0xAA
+	db 0xAAjj
